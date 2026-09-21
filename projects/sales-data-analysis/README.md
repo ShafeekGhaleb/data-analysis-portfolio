@@ -1,31 +1,61 @@
-# Sales Data Analysis & Power BI Dashboard
+# 📊 Sales Data Analysis Project
 
-## Project Overview
+## 📝 Overview
+This project presents an end-to-end sales performance analysis using Python and Power BI, structured as part of the data analysis portfolio by Shafeek Ghaleb.
 
-This project analyzes sales data from a small retail business.
+## 🔑 Key Performance Indicators (KPIs)
+- **Total Revenue:** €29,130.70
+- **Total Units Sold:** 1,503
+- **Average Order Value:** €971.02
+- **Total Transactions:** 30
 
-The goal is to transform raw sales data into clear information that can help identify sales trends, product performance, and customer behavior.
+---
 
-## Objectives
+## 📈 Visualizations
+![Sales Summary Charts](sales_summary_charts.png)
 
-- Clean and prepare the data
-- Analyze sales performance
-- Identify important trends and patterns
-- Create meaningful visualizations
-- Build an interactive Power BI dashboard
+---
 
-## Tools
+## 📊 Performance Breakdown
 
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Power BI
+### 1. Revenue by Category
+| Category | Revenue (€) | Percentage |
+| :--- | :---: | :---: |
+| **Electronics** | €12,590.20 | 43.2% |
+| **Office** | €11,714.00 | 40.2% |
+| **Home** | €4,826.50 | 16.6% |
 
-## Key Questions
+### 2. Revenue by Region
+| Region | Revenue (€) | Percentage |
+| :--- | :---: | :---: |
+| **North** | €8,427.80 | 28.9% |
+| **West** | €7,748.20 | 26.6% |
+| **South** | €6,771.20 | 23.2% |
+| **East** | €6,183.50 | 21.2% |
 
-- How do sales change over time?
-- Which products generate the most revenue?
+### 3. Revenue by Sales Channel
+| Channel | Revenue (€) | Percentage |
+| :--- | :---: | :---: |
+| **Online** | €20,075.50 | 68.9% |
+| **In-Store** | €9,055.20 | 31.1% |
+
+### 4. Top Products by Revenue
+1. **Office Chair:** €9,282.00
+2. **Keyboard:** €5,710.90
+3. **Desk Lamp:** €4,826.50
+4. **USB-C Hub:** €3,734.30
+5. **Wireless Mouse:** €3,145.00
+6. **Notebook:** €2,432.00
+
+---
+
+## 💡 Key Insights & Recommendations
+1. **Online Dominance:** Online sales account for nearly 69% of total revenue. Focus digital marketing strategies to further capitalize on this channel.
+2. **Category Strengths:** Electronics and Office supplies combined drive over 83% of total revenue.
+3. **Regional Performance:** The North region is the top performer (€8.4K), with stable distribution across all other territories.
+
+---
+*Created by Shafeek Ghaleb | Data Analysis Portfolio*
 - Which categories perform best?
 - Are there noticeable monthly or seasonal patterns?
 
