@@ -1,0 +1,31 @@
+Date,Region,Channel,Category,Product,Units,Unit_Price_EUR,Revenue_EUR
+2026-01-05,North,Online,Electronics,Wireless Mouse,25,18.5,462.5
+2026-01-07,West,Store,Office,Notebook,80,3.2,256
+2026-01-12,East,Online,Electronics,Keyboard,30,29.9,897
+2026-01-18,South,Store,Home,Desk Lamp,22,24.5,539
+2026-01-25,North,Online,Office,Office Chair,8,119,952
+2026-02-03,West,Online,Electronics,USB-C Hub,28,34.9,977.2
+2026-02-09,East,Store,Office,Notebook,95,3.2,304
+2026-02-14,South,Online,Home,Desk Lamp,31,24.5,759.5
+2026-02-21,North,Store,Electronics,Keyboard,26,29.9,777.4
+2026-02-27,West,Online,Office,Office Chair,10,119,1190
+2026-03-04,East,Online,Electronics,Wireless Mouse,42,18.5,777
+2026-03-11,South,Store,Home,Desk Lamp,27,24.5,661.5
+2026-03-17,North,Online,Office,Notebook,120,3.2,384
+2026-03-23,West,Store,Electronics,USB-C Hub,35,34.9,1221.5
+2026-03-29,East,Online,Office,Office Chair,12,119,1428
+2026-04-06,South,Online,Electronics,Keyboard,38,29.9,1136.2
+2026-04-12,North,Store,Home,Desk Lamp,35,24.5,857.5
+2026-04-19,West,Online,Office,Notebook,140,3.2,448
+2026-04-25,East,Store,Electronics,Wireless Mouse,48,18.5,888
+2026-04-30,South,Online,Office,Office Chair,14,119,1666
+2026-05-05,North,Online,Electronics,USB-C Hub,44,34.9,1535.6
+2026-05-10,West,Store,Office,Notebook,155,3.2,496
+2026-05-16,East,Online,Electronics,Keyboard,45,29.9,1345.5
+2026-05-22,South,Store,Home,Desk Lamp,39,24.5,955.5
+2026-05-28,North,Online,Office,Office Chair,16,119,1904
+2026-06-04,West,Online,Electronics,Wireless Mouse,55,18.5,1017.5
+2026-06-11,East,Store,Office,Notebook,170,3.2,544
+2026-06-18,South,Online,Home,Desk Lamp,43,24.5,1053.5
+2026-06-24,North,Store,Electronics,Keyboard,52,29.9,1554.8
+2026-06-29,West,Online,Office,Office Chair,18,119,2142
