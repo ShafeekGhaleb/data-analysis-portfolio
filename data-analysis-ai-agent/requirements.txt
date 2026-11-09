@@ -14,5 +14,5 @@ pytest>=8.0        # runs our automated tests
 
 # --- Added in later stages ---
 matplotlib>=3.8   # Stage 2: charts (bar, line, pie, histogram, scatter)
-# anthropic        # Stage 3: talking to the Claude API
-# python-dotenv    # Stage 3: reading the API key from the .env file
+anthropic>=2.6,<3       # Stage 3: the official Anthropic SDK (tested with 2.6.0)
+python-dotenv>=1.2      # Stage 3: reads settings (and later the key) from .env

@@ -17,3 +17,6 @@ outputs/
 
 # Test coverage data (created by pytest --cov)
 .coverage
+
+# Usage logs (metadata only, but personal to each user)
+logs/

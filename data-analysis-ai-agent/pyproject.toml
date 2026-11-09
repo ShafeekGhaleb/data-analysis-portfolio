@@ -5,3 +5,5 @@
 pythonpath = ["."]
 # Only look for tests inside the "tests" folder.
 testpaths = ["tests"]
+# Custom marker: tests that call the real API (skipped unless RUN_LIVE_TESTS=1).
+markers = ["live: makes a real, billed API request"]

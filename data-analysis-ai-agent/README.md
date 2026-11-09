@@ -5,7 +5,8 @@ in plain English, cleans and analyses the data with Python and Pandas, creates
 charts, and writes a professional report.
 
 > **Status:** 🚧 In development. Stages 1, 2 and 2.5 (data toolkit, charts, Metric Change
-> Explainer tools) are complete. The LLM agent itself starts at Stage 3.
+> Explainer tools) are complete. Stage 3 (secure LLM client) is built and tested offline;
+> the first live API call is pending the API key.
 
 ## How it works (architecture)
 
@@ -28,7 +29,7 @@ the results.
 | 1 | Data toolkit: load, inspect, clean, statistics (+ tests) | ✅ Done |
 | 2 | Charts: bar, line, pie, histogram, scatter (+ tests) | ✅ Done |
 | 2.5 | Metric Change Explainer: periods, contribution analysis, price/volume/mix, waterfall chart, SKILL.md (+ tests) | ✅ Done (Python tools) |
-| 3 | First LLM call | ⏳ Next |
+| 3 | LLM client: settings, budget check before every request, privacy-safe data summary, errors, metadata-only logs (+ tests) | 🟡 Built and tested offline; live test pending |
 | 4 | Tool use | ⬜ |
 | 5 | Agent loop | ⬜ |
 | 6 | Reports | ⬜ |
@@ -41,6 +42,15 @@ the results.
 
 ```
 data-analysis-ai-agent/
+├── agent/                  # Stage 3: the "phone line" to Claude
+│   ├── config.py           # settings from .env (never the key's value)
+│   ├── pricing.py          # verified prices, token and cost maths
+│   ├── budget.py           # spending cap, checked BEFORE every request
+│   ├── privacy.py          # structure-only dataset summary, safe JSON
+│   ├── prompts.py          # system prompt, data/question blocks
+│   ├── usage_log.py        # metadata-only usage log
+│   ├── llm_client.py       # LLMClient: the request-response flow
+│   └── testing.py          # fake client for tests (no key, no cost)
 ├── tools/                  # The agent's "hands": plain Python functions
 │   ├── errors.py           # ToolError: one clear error type for all tools
 │   ├── utils.py            # Helpers: JSON-safe values, column checks
@@ -53,9 +63,9 @@ data-analysis-ai-agent/
 │   └── change_analysis.py  # explain_change: contributions + price/volume/mix
 ├── skills/
 │   └── explain-metric-change/SKILL.md   # instructions for the future LLM agent
-├── tests/                  # 156 automated tests (pytest)
+├── tests/                  # 213 automated tests + 1 live test (off by default)
 ├── sample_data/            # A clean sales dataset and a deliberately messy one
-├── examples/               # stage1_demo.py, stage2_demo.py, skill_demo.py
+├── examples/               # stage1/2 demos, skill_demo.py, stage3_demo.py
 ├── outputs/                # Generated charts (not uploaded to GitHub)
 ├── requirements.txt        # Libraries to install
 ├── pyproject.toml          # pytest settings
@@ -84,6 +94,8 @@ pytest
 python examples/stage1_demo.py
 python examples/stage2_demo.py   # saves 6 example charts in outputs/
 python examples/skill_demo.py    # Metric Change Explainer: Q1 vs Q2 + 4 waterfall charts
+python examples/stage3_demo.py              # dry run: request + cost estimate, nothing sent
+python examples/stage3_demo.py --simulate   # fake client: shows response handling, nothing sent
 ```
 
 ## Tools available so far
@@ -115,3 +127,15 @@ the result (the agent's know-how).
 growth came from **volume** (+€6,293.23, units +54%); **mix** was −€335.73 and
 **price** €0.00. Every breakdown is checked to add up exactly to the total change.
 These figures show *where* the change happened, not *why*.
+
+## Talking to Claude (Stage 3)
+
+* **Model:** `claude-sonnet-5-5` by default; change `ANTHROPIC_MODEL` in `.env` (only models with a
+  verified price in `agent/pricing.py` are accepted).
+* **Budget:** before every request, the maximum possible cost (input estimate + `max_tokens` output,
+  times the number of attempts) must fit in the remaining session budget (`LLM_BUDGET_USD`, default $1.00).
+  Costs shown are *estimates*; the actual billed cost is in the Anthropic Console.
+* **Privacy:** Claude receives only a structure-only summary (column names, kinds, counts). No rows, no
+  cell values; columns that look like personal data are flagged.
+* **Logs:** `logs/llm_usage.jsonl` holds metadata only (time, model, tokens, cost estimates, request ID).
+* **Live test:** disabled by default; `RUN_LIVE_TESTS=1 pytest -m live` with a configured key.
