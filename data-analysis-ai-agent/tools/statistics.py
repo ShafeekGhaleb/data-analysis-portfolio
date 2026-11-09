@@ -145,7 +145,7 @@ def group_and_aggregate(df: pd.DataFrame, group_by, value_column: str | None = N
     }
 
 
-def _strength_label(r: float) -> str:
+def describe_strength(r: float) -> str:
     """Turn a correlation number (-1 to 1) into words a beginner can read."""
     size = abs(r)
     if size >= 0.7:
@@ -206,7 +206,7 @@ def correlation(df: pd.DataFrame, columns: list | None = None, method: str = "pe
                 "column_a": str(col_a),
                 "column_b": str(col_b),
                 "r": to_python(r, 3),
-                "interpretation": _strength_label(r),
+                "interpretation": describe_strength(r),
             })
     # Strongest relationships first (by size, ignoring the sign).
     pairs.sort(key=lambda p: abs(p["r"]), reverse=True)

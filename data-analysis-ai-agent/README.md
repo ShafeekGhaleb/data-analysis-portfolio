@@ -4,7 +4,7 @@ An AI agent that accepts CSV/Excel files, understands analysis requests written
 in plain English, cleans and analyses the data with Python and Pandas, creates
 charts, and writes a professional report.
 
-> **Status:** 🚧 In development. Stage 1 (data toolkit) is complete.
+> **Status:** 🚧 In development. Stages 1–2 (data toolkit and charts) are complete.
 
 ## How it works (architecture)
 
@@ -25,8 +25,8 @@ the results.
 |---|---|---|
 | 0 | Project setup | ✅ Done |
 | 1 | Data toolkit: load, inspect, clean, statistics (+ tests) | ✅ Done |
-| 2 | Charts | ⏳ Next |
-| 3 | First LLM call | ⬜ |
+| 2 | Charts: bar, line, pie, histogram, scatter (+ tests) | ✅ Done |
+| 3 | First LLM call | ⏳ Next |
 | 4 | Tool use | ⬜ |
 | 5 | Agent loop | ⬜ |
 | 6 | Reports | ⬜ |
@@ -45,10 +45,12 @@ data-analysis-ai-agent/
 │   ├── data_loading.py     # load_file: CSV / Excel -> DataFrame
 │   ├── inspection.py       # inspect_data: size, types, missing values
 │   ├── cleaning.py         # clean_data + individual cleaning steps
-│   └── statistics.py       # describe_statistics, group_and_aggregate, correlation
-├── tests/                  # 48 automated tests (pytest)
+│   ├── statistics.py       # describe_statistics, group_and_aggregate, correlation
+│   └── charts.py           # create_chart: Matplotlib charts saved as PNG
+├── tests/                  # 72 automated tests (pytest)
 ├── sample_data/            # A clean sales dataset and a deliberately messy one
-├── examples/stage1_demo.py # Run the toolkit by hand
+├── examples/               # stage1_demo.py (toolkit), stage2_demo.py (charts)
+├── outputs/                # Generated charts (not uploaded to GitHub)
 ├── requirements.txt        # Libraries to install
 ├── pyproject.toml          # pytest settings
 └── .env.example            # API key template (needed from Stage 3)
@@ -72,8 +74,9 @@ pip install -r requirements.txt
 # 4. Run the tests
 pytest
 
-# 5. Try the toolkit
+# 5. Try the toolkit and the charts
 python examples/stage1_demo.py
+python examples/stage2_demo.py   # saves 6 example charts in outputs/
 ```
 
 ## Tools available so far
@@ -87,3 +90,4 @@ python examples/stage1_demo.py
 | `describe_statistics(df)` | Mean, median, std, quartiles, top values, date ranges |
 | `group_and_aggregate(df, ...)` | e.g. total revenue by region, with % of total |
 | `correlation(df)` | Pearson / Spearman correlations, explained in words |
+| `create_chart(df, chart_type, x, y, ...)` | Bar, line, pie (donut), histogram or scatter chart saved as PNG; also returns the plotted numbers so the agent can describe the chart accurately |

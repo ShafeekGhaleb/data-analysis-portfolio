@@ -13,6 +13,6 @@ openpyxl>=3.1      # lets pandas read Excel (.xlsx) files
 pytest>=8.0        # runs our automated tests
 
 # --- Added in later stages ---
-# matplotlib       # Stage 2: charts
+matplotlib>=3.8   # Stage 2: charts (bar, line, pie, histogram, scatter)
 # anthropic        # Stage 3: talking to the Claude API
 # python-dotenv    # Stage 3: reading the API key from the .env file

@@ -25,6 +25,7 @@ from tools.cleaning import (
     strip_whitespace,
 )
 from tools.statistics import correlation, describe_statistics, group_and_aggregate
+from tools.charts import create_chart
 
 # __all__ lists the public names of this package (what `from tools import *` gives).
 __all__ = [
@@ -40,4 +41,5 @@ __all__ = [
     "describe_statistics",
     "group_and_aggregate",
     "correlation",
+    "create_chart",
 ]
