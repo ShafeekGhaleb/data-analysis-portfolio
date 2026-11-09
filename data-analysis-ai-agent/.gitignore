@@ -14,3 +14,6 @@ __pycache__/
 
 # Charts and reports the agent produces (can always be regenerated)
 outputs/
+
+# Test coverage data (created by pytest --cov)
+.coverage
