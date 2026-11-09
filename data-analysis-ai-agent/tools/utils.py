@@ -39,7 +39,9 @@ def to_python(value, decimals: int = 4):
         value = float(value)
         if math.isinf(value):  # infinity is also not allowed in JSON
             return None
-        return round(value, decimals)  # avoid ugly numbers like 971.0233333333
+        # round(): avoid ugly numbers like 971.0233333333.
+        # "+ 0.0" turns the confusing "negative zero" (-0.0) into a normal 0.0.
+        return round(value, decimals) + 0.0
     if isinstance(value, (pd.Timestamp, np.datetime64)):
         return pd.Timestamp(value).isoformat()
     if isinstance(value, (str, list, dict)):

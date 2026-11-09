@@ -25,7 +25,9 @@ from tools.cleaning import (
     strip_whitespace,
 )
 from tools.statistics import correlation, describe_statistics, group_and_aggregate
-from tools.charts import create_chart
+from tools.charts import create_chart, create_waterfall_chart
+from tools.change_analysis import explain_change
+from tools.periods import filter_period, parse_period, period_coverage
 
 # __all__ lists the public names of this package (what `from tools import *` gives).
 __all__ = [
@@ -42,4 +44,9 @@ __all__ = [
     "group_and_aggregate",
     "correlation",
     "create_chart",
+    "create_waterfall_chart",
+    "explain_change",
+    "parse_period",
+    "filter_period",
+    "period_coverage",
 ]

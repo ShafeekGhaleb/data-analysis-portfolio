@@ -32,6 +32,14 @@ def messy_csv_path() -> Path:
 
 
 @pytest.fixture
+def sales_df(sales_csv_path) -> pd.DataFrame:
+    """The real sales data, cleaned so that 'Date' holds real dates."""
+    from tools import clean_data, load_file  # imported here so conftest stays light
+    cleaned, _ = clean_data(load_file(sales_csv_path))
+    return cleaned
+
+
+@pytest.fixture
 def small_df() -> pd.DataFrame:
     """A tiny table where we can calculate every correct answer by hand."""
     return pd.DataFrame({

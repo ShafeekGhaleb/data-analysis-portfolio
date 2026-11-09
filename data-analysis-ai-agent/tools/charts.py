@@ -43,6 +43,7 @@ from matplotlib.ticker import FuncFormatter  # noqa: E402
 
 from tools.errors import ToolError  # noqa: E402
 from tools.inspection import column_kind  # noqa: E402
+from tools.periods import PERIODS  # noqa: E402
 from tools.statistics import AGGREGATIONS, describe_strength, group_and_aggregate  # noqa: E402
 from tools.utils import check_columns_exist, check_not_empty, to_python  # noqa: E402
 
@@ -69,8 +70,8 @@ MAX_PIE_SLICES = 6        # more slices than this: nobody can compare them
 MAX_SCATTER_GROUPS = 3    # more colours than this can't be told apart reliably
 MAX_RETURNED_POINTS = 100  # limit on how many data points we send back (for the LLM later)
 
-# Readable time periods for line charts -> pandas "period" codes.
-PERIODS = {"day": "D", "week": "W", "month": "M", "quarter": "Q", "year": "Y"}
+# PERIODS (readable names -> pandas period codes) now lives in tools/periods.py
+# so that charts and the change analysis share ONE definition (imported above).
 # How dates are written on the x-axis for each period ("%b" = short month name).
 DATE_FORMATS = {"day": "%d %b", "week": "%d %b", "month": "%b %Y", "quarter": "%b %Y", "year": "%Y"}
 
@@ -421,3 +422,158 @@ def _slugify(text: str) -> str:
     """Turn a title into a safe file name: 'Total Revenue by Region' -> 'total-revenue-by-region'."""
     slug = re.sub(r"[^0-9a-z]+", "-", text.lower()).strip("-")
     return slug[:80] or "chart"
+
+
+# ---------------------------------------------------------------------------
+# Waterfall ("bridge") chart for explain_change results
+# ---------------------------------------------------------------------------
+
+INCREASE_COLOR = PALETTE[0]   # blue  = this part pushed the total UP
+DECREASE_COLOR = PALETTE[1]   # orange = this part pulled the total DOWN
+TOTAL_COLOR = "#7a7974"       # grey  = the start and end totals
+MAX_WATERFALL_STEPS = 8       # more steps than this become unreadable
+WATERFALL_TOLERANCE = 0.01    # the shown values are rounded, so allow 1 cent of rounding
+
+PVM_LABELS = {"volume": "Volume", "mix": "Mix", "price": "Price",
+              "new_items": "New items", "discontinued_items": "Discontinued"}
+
+
+def create_waterfall_chart(analysis: dict, breakdown: str, max_steps: int = 6,
+                           title: str | None = None, output_dir="outputs",
+                           filename: str | None = None) -> dict:
+    """
+    Draw a waterfall chart from an explain_change() result.
+
+    A waterfall shows how you get from one total to another:
+        [Q1 total] + North + South + West - East = [Q2 total]
+    Each middle bar "floats": it starts where the previous one ended.
+
+    breakdown: a dimension name from the analysis (e.g. "Region"),
+               or "price_volume_mix" for the volume / mix / price bridge.
+
+    Like every chart tool, this one NEVER calculates the analysis itself:
+    it only draws the numbers that explain_change already reconciled.
+    """
+    if not isinstance(analysis, dict) or "summary" not in analysis or "drivers" not in analysis:
+        raise ToolError("create_waterfall_chart needs the result of explain_change().")
+    if not isinstance(max_steps, int) or not 2 <= max_steps <= MAX_WATERFALL_STEPS:
+        raise ToolError(f"max_steps must be a whole number from 2 to {MAX_WATERFALL_STEPS}.")
+
+    summary = analysis["summary"]
+    label_a, label_b = analysis["period_a"]["label"], analysis["period_b"]["label"]
+
+    # --- 1. Turn the analysis into a list of (label, value) steps ---
+    if breakdown == "price_volume_mix":
+        pvm = analysis.get("price_volume_mix")
+        if not pvm:
+            raise ToolError("This analysis has no price/volume/mix part (units_column and item_column were not given).")
+        if pvm["status"] != "ok":
+            raise ToolError("Price/volume/mix was not reliable, so it cannot be drawn: " + " ".join(pvm["reasons"]))
+        steps = [(PVM_LABELS[k], v) for k, v in pvm["effects"].items()
+                 # always show volume/mix/price; new/discontinued only when they exist
+                 if k in ("volume", "mix", "price") or v != 0]
+        breakdown_name = "price, volume and mix"
+    else:
+        if breakdown not in analysis["drivers"]:
+            raise ToolError(f"Unknown breakdown '{breakdown}'. Choose 'price_volume_mix' or one of "
+                            f"{list(analysis['drivers'])}.")
+        driver = analysis["drivers"][breakdown]
+        steps = [(c["group"], c["change"]) for c in driver["contributions"]]
+        other_value = driver["others"]["change"] if driver["others"] else 0.0
+        other_count = driver["others"]["groups"] if driver["others"] else 0
+        # Keep the biggest (max_steps - 1) groups; fold everything else into ONE "Other" bar.
+        if len(steps) > max_steps or (other_count and len(steps) >= max_steps):
+            folded = steps[max_steps - 1:]
+            steps = steps[:max_steps - 1]
+            other_value += sum(v for _, v in folded)
+            other_count += len(folded)
+        if other_count:
+            steps.append((f"Other ({other_count})", other_value))
+        breakdown_name = breakdown
+
+    # --- 2. Calculate where each floating bar starts and ends ---
+    start_total, end_total = summary["period_a_total"], summary["period_b_total"]
+    running = start_total
+    bars = [{"label": label_a, "value": start_total, "start": 0.0, "end": start_total, "kind": "total"}]
+    for label, value in steps:
+        bars.append({"label": label, "value": value, "start": running, "end": running + value,
+                     "kind": "increase" if value >= 0 else "decrease"})
+        running += value
+    bars.append({"label": label_b, "value": end_total, "start": 0.0, "end": end_total, "kind": "total"})
+
+    # The steps must lead exactly from the first total to the second.
+    reconciled = abs(running - end_total) <= WATERFALL_TOLERANCE
+    if not reconciled:
+        raise ToolError(f"The steps add up to {running:,.2f}, not {end_total:,.2f}; refusing to draw a misleading chart.")
+
+    # --- 3. Draw ---
+    colors = {"total": TOTAL_COLOR, "increase": INCREASE_COLOR, "decrease": DECREASE_COLOR}
+    fig, ax = plt.subplots(figsize=FIGURE_SIZE, dpi=DPI)
+    fig.set_facecolor(SURFACE)
+    ax.set_facecolor(SURFACE)
+    try:
+        positions = range(len(bars))
+        # One number format for ALL labels: whole numbers if every non-zero value is >= 100.
+        whole_numbers = all(abs(b["value"]) >= 100 or b["value"] == 0 for b in bars)
+        for i, bar in zip(positions, bars):
+            bottom = min(bar["start"], bar["end"])
+            height = abs(bar["end"] - bar["start"])
+            ax.bar(i, height, bottom=bottom, width=0.6, color=colors[bar["kind"]])
+            # Value label above each bar: totals plain, steps with an explicit + or − sign,
+            # so the direction is readable without relying on colour.
+            text = _waterfall_label(bar["value"], signed=bar["kind"] != "total", whole=whole_numbers)
+            ax.annotate(text, (i, max(bar["start"], bar["end"])), xytext=(0, 3),
+                        textcoords="offset points", ha="center", va="bottom",
+                        color=TEXT_SECONDARY, fontsize=9)
+            # A thin connector line from the end of this bar to the next bar.
+            if i < len(bars) - 1:
+                ax.plot([i + 0.3, i + 0.7], [bar["end"], bar["end"]], color=TEXT_SECONDARY, linewidth=0.8)
+
+        # Wrap long names onto two lines ("Wireless Mouse" -> "Wireless\nMouse").
+        ax.set_xticks(list(positions))
+        ax.set_xticklabels([b["label"].replace(" ", "\n", 1) if len(b["label"]) > 10 else b["label"]
+                            for b in bars])
+        _style_axes(ax, value_axis="y")
+        ax.margins(y=0.1)
+        metric = analysis.get("metric") or "Rows"
+        ax.set_ylabel(f"{metric} ({analysis['aggregate']})", color=TEXT_SECONDARY)
+
+        # A small legend, so colours are explained (the +/− signs carry the meaning too).
+        from matplotlib.patches import Patch
+        ax.legend(handles=[Patch(color=TOTAL_COLOR, label="Total"),
+                           Patch(color=INCREASE_COLOR, label="Increase"),
+                           Patch(color=DECREASE_COLOR, label="Decrease")],
+                  frameon=False, fontsize=9, labelcolor=TEXT_SECONDARY, ncol=3,
+                  # Below the plot area, so it can never cover a bar.
+                  loc="upper left", bbox_to_anchor=(0, -0.16))
+
+        title = title or f"{metric}: {label_a} → {label_b} by {breakdown_name}"
+        ax.set_title(title, loc="left", fontsize=13, fontweight="bold", color=TEXT_PRIMARY, pad=14)
+
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        path = output_dir / (filename or f"waterfall-{_slugify(title)}.png")
+        if path.suffix.lower() != ".png":
+            path = path.with_suffix(".png")
+        fig.savefig(path, dpi=DPI, bbox_inches="tight", facecolor=SURFACE)
+    finally:
+        plt.close(fig)
+
+    return {
+        "chart_type": "waterfall",
+        "title": title,
+        "path": str(path),
+        "breakdown": breakdown,
+        "steps": [{k: (to_python(v) if isinstance(v, float) else v) for k, v in b.items()} for b in bars],
+        "reconciled": reconciled,
+    }
+
+
+def _waterfall_label(value: float, signed: bool, whole: bool) -> str:
+    """'+3,276' / '−628' / '0' for steps; '11,587' for totals. One consistent format."""
+    if value == 0:
+        return "0"
+    number = f"{abs(value):,.0f}" if whole else f"{abs(value):,.2f}"
+    if not signed:
+        return ("−" if value < 0 else "") + number
+    return ("+" if value > 0 else "−") + number  # "−" is a real minus sign, wider than "-"
