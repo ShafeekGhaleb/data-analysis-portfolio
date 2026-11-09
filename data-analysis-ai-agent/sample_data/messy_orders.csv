@@ -1,0 +1,13 @@
+order_id,customer, City ,order_date,quantity,unit_price,payment_method
+1001,Alice Smith,Berlin,2026-01-05,3,"€1,200.50",Card
+1002,  Bob Jones ,Munich,2026-01-07,1,€35.00,Cash
+1003,Carla Diaz,Berlin,2026-01-09,,€18.99,Card
+1004,David Lee,  Hamburg,2026-01-12,2,€42.00,
+1002,Bob Jones,Munich,2026-01-07,1,€35.00,Cash
+1005,Eva Brown,Munich,2026/01/15,4,€9.50,PayPal
+1006,Frank Moore,Berlin,2026-01-18,2,unknown,Card
+1007,Grace Kim,,2026-01-20,5,€12.00,Card
+1008,Hassan Ali,Hamburg,2026-01-22,1,€250.00,PayPal
+1009,Ivy Chen,Berlin,2026-01-25,3,€18.99,Card
+1010,Jack White,Munich,2026-01-28,2,€35.00,Cash
+1011,Karin Vogel,Hamburg,2026-01-30,6,€9.50,Card

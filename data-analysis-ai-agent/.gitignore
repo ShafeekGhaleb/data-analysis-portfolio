@@ -1,0 +1,16 @@
+# Secrets: NEVER upload your API key to GitHub
+.env
+
+# Python virtual environment (each person creates their own)
+.venv/
+venv/
+
+# Files Python creates automatically
+__pycache__/
+*.pyc
+
+# Test tool cache
+.pytest_cache/
+
+# Charts and reports the agent produces (can always be regenerated)
+outputs/

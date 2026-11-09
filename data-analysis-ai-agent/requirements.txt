@@ -1,0 +1,18 @@
+# ---------------------------------------------------------------
+# Libraries this project needs. Install them all with:
+#     pip install -r requirements.txt
+# ">=" means "this version or newer".
+# ---------------------------------------------------------------
+
+# --- Data work (Stage 1) ---
+pandas>=2.2        # tables (DataFrames): loading, cleaning, statistics
+numpy>=1.26        # fast maths; pandas is built on top of it
+openpyxl>=3.1      # lets pandas read Excel (.xlsx) files
+
+# --- Testing (Stage 1) ---
+pytest>=8.0        # runs our automated tests
+
+# --- Added in later stages ---
+# matplotlib       # Stage 2: charts
+# anthropic        # Stage 3: talking to the Claude API
+# python-dotenv    # Stage 3: reading the API key from the .env file

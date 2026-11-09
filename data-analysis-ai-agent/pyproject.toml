@@ -1,0 +1,7 @@
+# Settings for pytest (our testing tool).
+[tool.pytest.ini_options]
+# Lets test files write "from tools import ..." because Python will
+# also look for modules in this folder (".").
+pythonpath = ["."]
+# Only look for tests inside the "tests" folder.
+testpaths = ["tests"]
